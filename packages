@@ -1,0 +1,15 @@
+alpine-base
+busybox
+musl
+openrc
+lsblk
+eudev
+dropbear
+wget curl
+dhcpcd
+iwd wpa_supplicant
+fastfetch
+btop
+agetty
+lscpu
+lshw
