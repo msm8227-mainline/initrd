@@ -62,7 +62,10 @@ add dbus default
 
 add local default
 
-chroot rootfs /bin/sh -c 'export PATH="/usr/bin:/usr/sbin:/bin:/sbin"; ln -s /bin/sh /init'
+chroot rootfs /bin/sh -c 'export PATH="/usr/bin:/usr/sbin:/bin:/sbin";
+ln -s /bin/sh /init;
+dropbearkey -t ed25519 -f /etc/dropbear/dropbear_ed25519_host_key'
+
 sed -i 's/#\?ttyS0/ttyMSM0/g' rootfs/etc/inittab
 echo "ttyMSM0" >> rootfs/etc/securetty
 
