@@ -5,9 +5,17 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+unmount () {
+  umount -R rootfs/dev && rm -rf rootfs/dev
+}
 
-rm -rf rootfs
-rm rootfs.cpio.gz
+gc () {
+  rm -rf rootfs
+  rm rootfs.cpio.gz
+}
+
+gc || (unmount && gc)
+
 mkdir rootfs
 mkdir rootfs/dev
 
@@ -31,6 +39,11 @@ echo 'export "PATH=/usr/bin:/usr/sbin:/bin:/sbin"' >> /etc/profile
 mkdir -p rootfs/lib/firmware/wlan/prima
 cp fw/* rootfs/lib/firmware/ 2>/dev/null
 cp fw/wlan/* rootfs/lib/firmware/wlan/prima
+
+for file in $(ls scripts); do
+  cp scripts/$file rootfs/
+  chmod +x rootfs/$file
+done
 
 mkdir -p "rootfs/etc/network"
 cat <<- EOF > "rootfs/etc/network/interfaces"
@@ -57,6 +70,7 @@ add udev-settle sysinit
 add udev-postmount default
 add hostname boot
 add networking default
+add dhcpcd default
 add iwd default
 add dbus default
 
@@ -69,7 +83,7 @@ dropbearkey -t ed25519 -f /etc/dropbear/dropbear_ed25519_host_key'
 sed -i 's/#\?ttyS0/ttyMSM0/g' rootfs/etc/inittab
 echo "ttyMSM0" >> rootfs/etc/securetty
 
-umount -R rootfs/dev && rm -rf rootfs/dev
+unmount
 
 cd rootfs
 chown -h -R 0:0 .
